@@ -1,0 +1,232 @@
+<!DOCTYPE html>
+<html>
+	<head>
+		<title> Gaming: Forside </title>
+		<meta charset="utf-8"/>
+		<link rel="stylesheet" type="text/css" href="mal.css"/>
+	</head>
+	
+	<body>
+	
+	<a href="index.html">Hovudside</a></br>
+	<button onclick="enablegame()">Start</button></br>
+	
+	<canvas id="myCanvas" width="500" height="500" style="border:1px solid #c3c3c3;">
+	Your browser does not support the HTML5 canvas tag.
+	</canvas>
+
+	<p>SCORE: </p>
+	<p id="score"></p>
+	</br>
+	<form id="form">
+		<input type="text" id="user" required placeholder="gamer name :)"></br>
+		<button id="submit">Submit highscore!</button></br>
+	</form>
+	
+    <script src="https://www.gstatic.com/firebasejs/8.2.2/firebase-app.js"></script>
+    <script src="https://www.gstatic.com/firebasejs/8.2.2/firebase-database.js"></script>
+    <script src="https://www.gstatic.com/firebasejs/8.2.2/firebase-analytics.js"></script>
+
+<script>
+  // Your web app's Firebase configuration
+  // For Firebase JS SDK v7.20.0 and later, measurementId is optional
+  var firebaseConfig = {
+    apiKey: "AIzaSyBjEd8d5CJOw_AYjEDsVLdRDdEqLUxQik4",
+    authDomain: "project-e7054.firebaseapp.com",
+    databaseURL: "https://project-e7054-default-rtdb.firebaseio.com",
+    projectId: "project-e7054",
+    storageBucket: "project-e7054.appspot.com",
+    messagingSenderId: "207450878491",
+    appId: "1:207450878491:web:9f4645bdd8709ae1ff3ebe",
+    measurementId: "G-Q1KXEH5TZP"
+  };
+  // Initialize Firebase
+  firebase.initializeApp(firebaseConfig);
+  firebase.analytics();
+ 
+</script>
+
+<script>
+  
+  //DATABASE
+  database = firebase.database();
+        textDisplay = document.getElementById("txt");
+        scores = database.ref("scores");
+        form = document.getElementById("form");
+		        user = document.getElementById("user");
+  //DATABASE
+  
+score = 0;
+
+bx = 50;
+by = 0;
+i = 0;
+j = 0;
+
+vy = 0;
+donk = 0;
+
+X = 500;
+Y1 = 0;
+Y2 = 300;
+
+game = false;
+
+function enablegame()
+{
+	game = true;
+	bx = 50;
+by = 0;
+i = 0;
+j = 0;
+
+vy = 0;
+donk = 0;
+
+X = 500;
+Y1 = 0;
+Y2 = 300;
+score = 0;
+document.getElementById("score").innerHTML = score;
+}
+
+
+
+function regNewScore(evt){
+			alert("Score submitted!")
+            evt.preventDefault();
+		    NewScore= {
+                "user": user.value,
+                "score": score,
+				//"likes": likes.value,
+				
+            };
+            scores.push(NewScore);
+            score.value = "";
+        }
+
+        //scores.on("child_added", showMessage);
+        form.onsubmit = regNewScore;
+//DATABASE
+
+document.addEventListener('keydown', keyDownHandler, false);
+document.addEventListener('keyup', keyUpHandler, false);
+
+var rightPressed = false;
+var leftPressed = false;
+var upPressed = false;
+var downPressed = false;
+
+function keyDownHandler(event) {
+    if(event.keyCode == 39) {
+		rightPressed = true;
+    }
+    if(event.keyCode == 37) {
+        leftPressed = true;
+    }
+    if(event.keyCode == 40) {
+    	downPressed = true;
+    }
+    if(event.keyCode == 38) {
+    	upPressed = true;
+    }
+}
+
+function keyUpHandler(event)
+{
+	if(event.keyCode == 39) {
+		rightPressed = false;
+    }
+    if(event.keyCode == 37) {
+        leftPressed = false;
+    }
+    if(event.keyCode == 40) {
+    	downPressed = false;
+    }
+    if(event.keyCode == 38) {
+    	upPressed = false;
+    }
+}
+
+var c = document.getElementById("myCanvas");
+var ctx = c.getContext("2d");
+ctx.fillStyle = "#FF0000";
+
+setInterval(function() {update()}, 10);
+
+function update() {
+
+	if (game)
+	{
+		 ctx.clearRect(0, 0, myCanvas.width, myCanvas.height)
+		
+		//Gravity
+		vy += 0.1;
+		
+		/*
+		if(rightPressed) {
+			bx += 1;
+		}
+		else if(leftPressed) {
+			bx -= 1;
+		}
+		if(downPressed) {
+			by += 1;
+		}
+		*/
+		if(upPressed) {
+			vy = -2;
+		}
+		
+		by += vy;
+		
+		
+
+		 //drawRect(i, j);
+		 drawRect(bx, by);
+		 drawPipe(X,Y1 + donk,50,180);
+		 drawPipe(X,Y2 + donk,50,200);
+		 
+		 --X;
+		 //X %= myCanvas.width;
+		 if (X < 1)
+		 {
+			score += 1;
+			X = 500;
+			donk = Math.floor(Math.random() * 101);     // returns a random integer from 0 to 100
+			document.getElementById("score").innerHTML = score;
+		 }
+		 
+		 if (bx + 50 > X && bx < X + 50)
+		 {
+			if (by < Y1 + donk + 180 || by + 50 > Y2 + donk)
+			{
+				game = false;
+			}
+		 }
+		 
+		 if (by > 500 || by < 0)
+			game = false;
+		 
+		 ++i;
+		 i %= myCanvas.width;
+		 ++j;
+		 j %= myCanvas.height;
+	}
+}
+function drawRect(x, y){ctx.fillRect(x, y,50,50)};
+
+function drawPipe(x,y,w,h)
+{
+	ctx.fillRect(x,y,w,h);
+}
+window.requestAnimationFrame(update);
+form.onsubmit = regNewMessage;
+  
+</script>
+	
+	<h1> The American truth </h1>
+	</body>
+</html>
+
+<img src="https://cdn.britannica.com/58/129958-050-C3FE2DD2/Adolf-Hitler-1933.jpg" width="30" height="30"></button>
